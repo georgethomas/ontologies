@@ -1,0 +1,668 @@
+# baseURI: http://vocab.data.gov/drm
+
+@prefix :        <http://vocab.data.gov/drm#> .
+@prefix daml:    <http://www.daml.org/2001/03/daml+oil#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix drm:     <http://vocab.data.gov/drm#> .
+@prefix fea:     <http://vocab.data.gov/def/fea/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+dc:date
+      rdfs:subPropertyOf fea:date .
+
+dc:description
+      rdfs:subPropertyOf fea:description .
+
+dc:identifier
+      rdfs:subPropertyOf :identifier .
+
+:     rdf:type owl:Ontology ;
+      rdfs:comment "A metamodel for government data"^^xsd:string ;
+      rdfs:label "Data Reference Model"^^xsd:string ;
+      dc:contributor "TopQuadrant"^^xsd:string , "George Thomas"^^xsd:string , "US Department of Health and Human Services"^^xsd:string ;
+      dc:creator "FEA CoP"^^xsd:string ;
+      fea:mnemonic "DRM"^^xsd:string ;
+      owl:imports fea: , dc: .
+
+:Attribute
+      rdf:type owl:Class ;
+      rdfs:comment "Example: The “SSN” Attribute of a “Person” Entity may have a Data Type of “string” (if hyphens are included with the SSN) or “integer” (if hyphens are not included)." , "A characteristic of an Entity whose value may be used to help distinguish one instance of an Entity from other instances of the same Entity. For example, an Attribute of a “Person” Entity may be “Social Security Number (SSN)”. An SSN is used to distinguish one person (i.e. one instance of a “Person” Entity) from another."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Attribute"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :DataType ;
+                owl:onProperty :constrainedBy
+              ] .
+
+:Consumer
+      rdf:type owl:Class ;
+      rdfs:comment "An entity (person or organization) that consumes data that is supplied by a Supplier."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Consumer"^^xsd:string ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] .
+
+:DataAccess
+      rdf:type owl:Class ;
+      rdfs:comment "Requests for data services, such as a query of a Data Asset.  These requests are supported by Data Access Services"^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Data access"^^xsd:string ;
+      rdfs:subClassOf owl:Thing .
+
+:DataAsset
+      rdf:type owl:Class ;
+      rdfs:comment "The term “data asset” is synonymous with “data source”" , "Example: A document that is stored and managed within a data asset (such as a document repository) has management context provided for it through the metadata that is associated with that document within the document repository. Such metadata may include the Dublin Core attributes that are described in the Data Description chapter." , "A managed container for data. In many cases, this will be a relational database; however, a Data Asset may also be a Web site, a document repository, directory or data service."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Data asset"^^xsd:string ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :DigitalDataResource ;
+                owl:onProperty :providesManagementContext
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Stewardship ;
+                owl:onProperty :hasStewardship
+              ] ;
+      owl:equivalentClass
+              [ rdf:type owl:Class ;
+                owl:intersectionOf (:DigitalDataResource [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasStewardship ;
+                            owl:someValuesFrom :Stewardship
+                          ])
+              ] .
+
+:DataSchema
+      rdf:type owl:Class ;
+      rdfs:comment "A representation of metadata, often in the form of data artifacts such as logical data models or conceptual data models. The Data Schema concept group is comprised of those concepts pertaining to the representation of structured data. A Data Schema provides a means to provision data sharing services that is independent of the values of the data in the data resource that it describes."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Data schema"^^xsd:string ;
+      rdfs:subClassOf :StructuredDataResource .
+
+:DataSteward
+      rdf:type owl:Class ;
+      rdfs:comment "A person responsible for managing a Data Asset."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Data steward"^^xsd:string ;
+      rdfs:subClassOf :Person ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :initialDate
+              ] ;
+      owl:equivalentClass
+              [ rdf:type owl:Class ;
+                owl:intersectionOf (:Person [ rdf:type owl:Restriction ;
+                            owl:onProperty :manages ;
+                            owl:someValuesFrom :DataAsset
+                          ])
+              ] .
+
+:DataType
+      rdf:type owl:Class ;
+      rdfs:comment "A constraint on the type of data that an instance of an Attribute may hold (e.g. \"string\" or \"integer\")."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Data type"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] .
+
+:DigitalDataResource
+      rdf:type owl:Class ;
+      rdfs:comment "A digital container of information, typically known as a file. A Digital Data Resource may be one of three specific types of data resources, each corresponding to one of the three types of data described earlier, and each described below (see “Structured Data Resource”, “Semi-Structured Data Resource”, and “Unstructured Data Resource”). It will be a container for the metadata about the data resource."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Digital data resource"^^xsd:string ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Topic ;
+                owl:onProperty :categorizedBy
+              ] .
+
+:Document
+      rdf:type owl:Class ;
+      rdfs:comment "While a Document can contain structured data, it normally has explanatory material included, which would cause it to therefore be considered semi-structured.  It is for this reason that there is no “contains” relationship from Document to Structured Data Resource. It is very important to separate Documents from Structured Data Resources because they are processed very differently. The difference between a Document and a Digital Data Resource, therefore, is that a Digital Data Resource can contained structured data." , "A file containing Unstructured and/or Semi-Structured Data Resources." ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Document"^^xsd:string ;
+      rdfs:subClassOf :DigitalDataResource .
+
+:Entity
+      rdf:type owl:Class ;
+      rdfs:comment "An abstraction for a person, place, object, event, or concept described (or characterized) by common Attributes. For example, “Person” and “Agency” are Entities. An instance of an Entity represents one particular occurrence of the Entity, such as a specific person or a specific agency."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Entity"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Attribute ;
+                owl:onProperty :contains
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Relationship ;
+                owl:onProperty :participatesIn
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :DataSchema ;
+                owl:onProperty :isElementOf
+              ] .
+
+:ExchangePackage
+      rdf:type owl:Class ;
+      rdfs:comment "A description of a specific recurring data exchange between a Supplier and a Consumer. An Exchange Package contains information (metadata) relating to the exchange (such as Supplier ID, Consumer ID, validity period for data, etc.), as well as a reference to the Payload (message content) for the exchange. An Exchange Package can also be used to define the result format for a query that is accepted and processed by a Query Point in a data sharing scenario."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Exchange package"^^xsd:string ;
+      rdfs:subClassOf :StructuredDataResource ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Supplier ;
+                owl:onProperty :producedBy
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Entity ;
+                owl:onProperty :refersToEntity
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :disseminatedTo
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :PayloadDefinition ;
+                owl:onProperty :refersToPayload
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Consumer ;
+                owl:onProperty :disseminatedTo
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :QueryPoint ;
+                owl:onProperty :queries
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :producedBy
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] .
+
+:ExternalDataSchema
+      rdf:type owl:Class ;
+      rdfs:comment "This is a schema not described using DRM built-in concepts, but just pointed to. For example, XML Schema file"^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "External data schema"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      owl:equivalentClass
+              [ rdf:type owl:Class ;
+                owl:intersectionOf (:DataSchema [ rdf:type owl:Restriction ;
+                            owl:minCardinality "1"^^xsd:int ;
+                            owl:onProperty :locationPointer
+                          ])
+              ] .
+
+:InternalDataSchema
+      rdf:type owl:Class ;
+      rdfs:comment "This is the data schema described using DRM built-in concepts"^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Internal data schema"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      owl:equivalentClass
+              [ rdf:type owl:Class ;
+                owl:intersectionOf (:DataSchema [ rdf:type owl:Restriction ;
+                            owl:minCardinality "1"^^xsd:int ;
+                            owl:onProperty :hasSchemaElement
+                          ])
+              ] .
+
+:PayloadDefinition
+      rdf:type owl:Class ;
+      rdfs:comment "Example: A specific message set expressed as an XML schema or an EDI transaction set that contains information about a “Person” entity." , "An electronic definition that defines the requirements for the Payload (data) that is exchanged between a Supplier and a Consumer."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Payload definition"^^xsd:string ;
+      rdfs:subClassOf :StructuredDataResource ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] .
+
+:Person
+      rdf:type owl:Class ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Person"^^xsd:string ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "0"^^xsd:int ;
+                owl:onProperty :employeeID
+              ] .
+
+:QueryPoint
+      rdf:type owl:Class ;
+      rdfs:comment "An endpoint that provides an interface for accessing and querying a Data Asset. A concrete representation of a Query Point may be a specific URL at which a query Web Service may be invoked."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Query point"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Topic ;
+                owl:onProperty :categorizedBy
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :ExchangePackage ;
+                owl:onProperty :returnsResultSetSpecifiedIn
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :accesses
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :DataAsset ;
+                owl:onProperty :accesses
+              ] .
+
+:Relationship
+      rdf:type owl:Class ;
+      rdfs:comment "Describes the relationship between two Entities."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Relationship"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :destination
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Entity ;
+                owl:onProperty :origin
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :origin
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Entity ;
+                owl:onProperty :destination
+              ] .
+
+:SemistructuredDataResource
+      rdf:type owl:Class ;
+      rdfs:comment "A Digital Data Resource containing semi-structured data. This will generally consist in part of structured data and in part of unstructured data."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Semistructured data resource"^^xsd:string ;
+      rdfs:subClassOf :Document .
+
+:Stewardship
+      rdf:type owl:Class ;
+      rdfs:comment "The concept of managing a data resource"^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Stewardship"^^xsd:string ;
+      rdfs:subClassOf owl:Thing .
+
+:StructuredDataResource
+      rdf:type owl:Class ;
+      rdfs:comment "A Digital Data Resource containing structured data. This data can be accessed in a uniform manner, independent of data values, once the Data Schema is known."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Structured data resource"^^xsd:string ;
+      rdfs:subClassOf :DigitalDataResource .
+
+:Supplier
+      rdf:type owl:Class ;
+      rdfs:comment "An entity (person or organization) that supplies data to a Consumer."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Supplier"^^xsd:string ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] .
+
+:Taxonomy
+      rdf:type owl:Class ;
+      rdfs:comment "A collection of controlled vocabulary terms organized into a hierarchical structure. Taxonomies provide a means for categorizing or classifying information within a reasonably well-defined associative structure, in which each term in a Taxonomy is in one or more parent/child (broader/narrower) relationships to other terms in the Taxonomy."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Taxonomy"^^xsd:string ;
+      rdfs:subClassOf owl:Thing ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :StructuredDataResource ;
+                owl:onProperty :representedAs
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:allValuesFrom :Topic ;
+                owl:onProperty :contains
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "0"^^xsd:int ;
+                owl:onProperty :acronym
+              ] ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:cardinality "1"^^xsd:int ;
+                owl:onProperty :identifier
+              ] .
+
+:Topic
+      rdf:type owl:Class ;
+      rdfs:comment "A category within a Taxonomy. A Topic is the central concept for applying context to data. For example, an agency may have a Taxonomy that represents their organizational structure. In such a Taxonomy, each role in the organizational structure (e.g. CIO) represents a Topic. Topic is often synonymous with “node”."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Topic"^^xsd:string ;
+      rdfs:subClassOf :Entity ;
+      rdfs:subClassOf
+              [ rdf:type owl:Restriction ;
+                owl:minCardinality "1"^^xsd:int ;
+                owl:onProperty :name
+              ] .
+
+:UnstructuredDataResource
+      rdf:type owl:Class ;
+      rdfs:comment "A Digital Data Resource containing unstructured data. Unstructured data is collection of data values that are likely to be processed only by specialized application programs."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "Unstructured data resource"^^xsd:string ;
+      rdfs:subClassOf :Document .
+
+:accesses
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "accesses"^^xsd:string .
+
+:acronym
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "Reference model acronym."^^xsd:string ;
+      rdfs:label "acronym"^^xsd:string ;
+      rdfs:subPropertyOf fea:mnemonic .
+
+:categorizedBy
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "categorized by"^^xsd:string .
+
+:categorizes
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "categorizes"^^xsd:string ;
+      owl:inverseOf :categorizedBy .
+
+:classification
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "The security classification for an Exchange Package."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "classification"^^xsd:string .
+
+:constrainedBy
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "constrained by"^^xsd:string .
+
+:contains
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "contains"^^xsd:string .
+
+:defines
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:domain :DataSchema ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "defines"^^xsd:string ;
+      rdfs:range :StructuredDataResource .
+
+:destination
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "destination"^^xsd:string ;
+      rdfs:subPropertyOf :relates .
+
+:disseminatedTo
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "disseminated to"^^xsd:string .
+
+:employeeID
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "employee iD"^^xsd:string .
+
+:frequency
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "The frequency at which the exchange occurs."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "frequency"^^xsd:string .
+
+:geospatialEnabled
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "Designates whether or not the Data Asset supports or provides Geospatial data."^^xsd:string ;
+      rdfs:domain :DataAsset ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "geospatial enabled"^^xsd:string ;
+      rdfs:range xsd:boolean .
+
+:hasSchemaElement
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment "This relationship is not explicitly stated in the DRM document. It has been created because there was a need to connect the schema with the entities, relationships, etc."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "has schema element"^^xsd:string ;
+      owl:inverseOf :isElementOf .
+
+:hasStewardship
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "has stewardship"^^xsd:string .
+
+:identifier
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "The “Identifier” attribute is described at an abstract level in order to be consistent with the abstract nature of the reference model. Therefore, there are no references to aspects such as identifier uniqueness, representation format, or similar. Implementations based on the DRM will introduce such aspects as needed according to their requirements."^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "identifier"^^xsd:string .
+
+:initialDate
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "The date that the Data Steward became associated with the Data Asset."^^xsd:string ;
+      rdfs:domain :DataSteward ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "initial date"^^xsd:string ;
+      rdfs:range xsd:date .
+
+:isElementOf
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "is element of"^^xsd:string .
+
+:locationPointer
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment "This is a link to location of a digital resource"^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "location pointer"^^xsd:string .
+
+:managedBy
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "managed by"^^xsd:string .
+
+:manages
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "manages"^^xsd:string ;
+      owl:inverseOf :managedBy .
+
+:name
+      rdf:type owl:DatatypeProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "name"^^xsd:string .
+
+:origin
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "origin"^^xsd:string ;
+      rdfs:subPropertyOf :relates .
+
+:participatesIn
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "participates in"^^xsd:string ;
+      owl:inverseOf :relates .
+
+:producedBy
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "produced by"^^xsd:string .
+
+:produces
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "produces"^^xsd:string ;
+      owl:inverseOf :producedBy .
+
+:providesManagementContext
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "provides management context"^^xsd:string .
+
+:queries
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "queries"^^xsd:string ;
+      owl:inverseOf :returnsResultSetSpecifiedIn .
+
+:refersTo
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "refers to"^^xsd:string .
+
+:refersToEntity
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "refers to entity"^^xsd:string ;
+      rdfs:subPropertyOf :refersTo .
+
+:refersToPayload
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "refers to payload"^^xsd:string ;
+      rdfs:subPropertyOf :refersTo .
+
+:relates
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "relates"^^xsd:string .
+
+:representedAs
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "represented as"^^xsd:string .
+
+:returnsResultSetSpecifiedIn
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "returns result set specified in"^^xsd:string .
+
+:worksFor
+      rdf:type owl:ObjectProperty ;
+      rdfs:comment ""^^xsd:string ;
+      rdfs:isDefinedBy : ;
+      rdfs:label "works for"^^xsd:string .
+
+rdfs:label
+      rdfs:subPropertyOf :name .
